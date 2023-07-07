@@ -20,12 +20,17 @@
     }
   ],
   "require": {
-    "php": "^8.0",
+    "php": "^8.1",
     "ext-fileinfo": "*",
     "illuminate/view": "^10.13",
     "vlucas/phpdotenv": "^5.5"
   },
   "bin": [
-    "bin/caxton"
-  ]
+    "caxton"
+  ],
+  "autoload": {
+    "psr-4": {
+      "SavvyWombat\\Caxton\\": "src/"
+    }
+  }
 }
