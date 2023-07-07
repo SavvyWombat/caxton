@@ -32,6 +32,7 @@ $dotenv->load();
 
 $_ENV['BASE_URL'] = $_ENV['BASE_URL'] ?? "http://localhost";
 $_ENV['CONTENT_PATH'] = $_ENV['WORKING_DIR'] . ($_ENV['CONTENT_DIR'] ?? '/content');
+$_ENV['PUBLIC_PATH'] = $_ENV['WORKING_DIR'] . ($_ENV['PUBLIC_DIR'] ?? '/public');
 $_ENV['CACHE_PATH'] = $_ENV['WORKING_DIR'] . '/build' . ($_ENV['CACHE_DIR'] ?? '/cache');
 $_ENV['OUTPUT_PATH'] = $_ENV['WORKING_DIR'] . '/build' . ($_ENV['OUTPUT_DIR'] ?? '/dev');
 
@@ -41,6 +42,37 @@ if (! file_exists($_ENV['WORKING_DIR'] . '/build')) {
 }
 
 // 1.   copy stuff from public to content
+
+// 1.1. scan public folder for structure
+$publicFiles = new RecursiveIteratorIterator(
+    new ContentFileFilter(
+        new RecursiveDirectoryIterator(
+            $_ENV['PUBLIC_PATH'],
+            FilesystemIterator::SKIP_DOTS
+        )
+    ),
+    RecursiveIteratorIterator::SELF_FIRST
+);
+
+// 1.2. copy files
+foreach ($publicFiles as $publicFile) {
+    $subpath = str_replace(
+        $_ENV['PUBLIC_PATH'],
+        '',
+        $publicFile->getRealPath()
+    );
+
+    if (!file_exists($_ENV['OUTPUT_PATH'] . dirname($subpath))) {
+        // directories need the 'execute/search' bit
+        // permissions are subject to the umask value in the running environment
+        mkdir($_ENV['OUTPUT_PATH'] . dirname($subpath), 0775, true);
+    }
+
+    if (!is_dir($publicFile->getRealPath())) {
+        echo $subpath . "\n";
+        copy($publicFile->getRealPath(), $_ENV['OUTPUT_PATH'] . $subpath);
+    }
+}
 
 // 2.   build assets (styles and scripts)
 
