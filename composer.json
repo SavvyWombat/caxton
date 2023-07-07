@@ -1,0 +1,31 @@
+{
+  "name": "savvywombat/caxton",
+  "description": "A static site generator written in PHP using Blade templates",
+  "keywords": [
+    "php",
+    "static site generator",
+    "static site builder",
+    "blade",
+    "template"
+  ],
+  "license": "MIT",
+  "support": {
+    "issues": "https://github.com/SavvyWombat/caxton/issues",
+    "source": "https://github.com/SavvyWombat/caxton"
+  },
+  "authors": [
+    {
+      "name": "Stuart Jones",
+      "email": "stuart@savvywombat.com.au"
+    }
+  ],
+  "require": {
+    "php": "^8.0",
+    "ext-fileinfo": "*",
+    "illuminate/view": "^10.13",
+    "vlucas/phpdotenv": "^5.5"
+  },
+  "bin": [
+    "bin/caxton"
+  ]
+}
