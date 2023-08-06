@@ -23,6 +23,8 @@ Caxton looks for a `.env` file in your project's root directory. The following v
 
 You can create different environment configurations, for example `.env.prod`.
 
+Caxton will also look for additional configuration in `caxton.json`. The various options are covered in the relevant sections below.
+
 ### Building with Caxton
 
 To build a site, you need at least one Blade template in your content directory. Then you can run:
@@ -39,7 +41,60 @@ vendor/bin/caxton -e prod
 
 ## Assets (styles, scripts and images)
 
-TBD - this package is currently under development.
+Common assets should be placed in your public directory. These will be copied to the build directory before your templates are built into HTML.
+
+You can also put assets in your content directory alongside your templates to keep related assets and templates together.
+ 
+## Directory structure
+
+Caxton expects the following structure, but can be overridden with environment variables:
+
+```
+/project/dir/content
+/project/dir/public
+```
+
+The content and public paths are configurable as ENV variables in `.env` files.
+
+The public directory should contain common files like images and stylesheets.
+
+The content directory is where you put your templates that Caxton will use to create your HTML.
+You can include assets (images, stylesheets, scripts, and so on) alongside your templates.
+These assets will then be included in the same output directory as the generated HTML.
+
+## Building
+
+```
+vendor/bin/caxton
+```
+
+The default output directory is `/project/dir/public/dev`, but can be overridden via the environment switch:
+
+```
+vendor/bin/caxton -e prod
+```
+
+Caxton will first copy the contents of the `public` directory to the build output directory. 
+It will then copy any asset files from the `content` directory, as well as build the HTML files from the templates there.
+
+Files and directories that begin with a `.` or `_` will not be ignored.
+
+### Block/allow list
+
+You can specify blocked and allowed filenames in the `caxton.json` configuration file. File paths are relative to the working directory.
+
+```
+{
+  "files": {
+    "allow": [
+      "public/_redirects"
+    ],
+    "block": [
+      "content/never-include-this-file"
+    ],
+  }
+}
+```
 
 ## Why is this package called Caxton?
 
