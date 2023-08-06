@@ -30,6 +30,15 @@ $env->safeLoad();
 $dotenv = Dotenv\Dotenv::createImmutable(realpath($_ENV['WORKING_DIR']));
 $dotenv->load();
 
+// look for a caxton config
+$_ENV['CONFIG'] = [];
+if (file_exists(realpath($_ENV['WORKING_DIR'] . '/caxton.json'))) {
+    $_ENV['CONFIG'] = json_decode(
+            file_get_contents(realpath($_ENV['WORKING_DIR'] . '/caxton.json')),
+            true
+    );
+}
+
 $_ENV['BASE_URL'] = $_ENV['BASE_URL'] ?? "http://localhost";
 $_ENV['CONTENT_PATH'] = $_ENV['WORKING_DIR'] . ($_ENV['CONTENT_DIR'] ?? '/content');
 $_ENV['PUBLIC_PATH'] = $_ENV['WORKING_DIR'] . ($_ENV['PUBLIC_DIR'] ?? '/public');
@@ -160,5 +169,8 @@ foreach ($contentFiles as $contentFile) {
 
         echo $_ENV['BASE_URL'] . (str_ends_with($subpath, 'index') ? substr($subpath, 0, -5) : $subpath) . "\n";
         file_put_contents($_ENV['OUTPUT_PATH'] . $subpath . '.html', $output);
+    } else if (!is_dir($contentFile->getRealPath())) {
+        echo $subpath . "\n";
+        copy($contentFile->getRealPath(), $_ENV['OUTPUT_PATH'] . $subpath);
     }
 }
