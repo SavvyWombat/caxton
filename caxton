@@ -17,9 +17,10 @@ use Illuminate\View\FileViewFinder;
 use SavvyWombat\Caxton\App;
 use SavvyWombat\Caxton\ContentFileFilter;
 
-$index = array_search(['-e', '--env'], $argv);
+$_ENV['VERBOSE'] = in_array('-v', $argv) || in_array('--verbose', $argv);
 
-$_ENV['ENVIRONMENT'] = $argv[$index + 2] ?? 'dev';
+$index = array_search('-e', $argv) ?: array_search('--env', $argv);
+$_ENV['ENVIRONMENT'] = $argv[$index + 1] ?? 'dev';
 $_ENV['WORKING_DIR'] = getcwd();
 
 // prefer specific environment if available
@@ -43,7 +44,7 @@ $_ENV['BASE_URL'] = $_ENV['BASE_URL'] ?? "http://localhost";
 $_ENV['CONTENT_PATH'] = $_ENV['WORKING_DIR'] . ($_ENV['CONTENT_DIR'] ?? '/content');
 $_ENV['PUBLIC_PATH'] = $_ENV['WORKING_DIR'] . ($_ENV['PUBLIC_DIR'] ?? '/public');
 $_ENV['CACHE_PATH'] = $_ENV['WORKING_DIR'] . '/build' . ($_ENV['CACHE_DIR'] ?? '/cache');
-$_ENV['OUTPUT_PATH'] = $_ENV['WORKING_DIR'] . '/build' . ($_ENV['OUTPUT_DIR'] ?? '/dev');
+$_ENV['OUTPUT_PATH'] = $_ENV['WORKING_DIR'] . '/build' . ($_ENV['OUTPUT_DIR'] ?? '/' . $_ENV['ENVIRONMENT']);
 
 // 0.   clean old build
 if (! file_exists($_ENV['WORKING_DIR'] . '/build')) {
@@ -78,7 +79,7 @@ foreach ($publicFiles as $publicFile) {
     }
 
     if (!is_dir($publicFile->getRealPath())) {
-        echo $subpath . "\n";
+        writeLn($subpath);
         copy($publicFile->getRealPath(), $_ENV['OUTPUT_PATH'] . $subpath);
     }
 }
@@ -167,10 +168,16 @@ foreach ($contentFiles as $contentFile) {
             ]
         )->render();
 
-        echo $_ENV['BASE_URL'] . (str_ends_with($subpath, 'index') ? substr($subpath, 0, -5) : $subpath) . "\n";
+        writeLn($_ENV['BASE_URL'] . (str_ends_with($subpath, 'index') ? substr($subpath, 0, -5) : $subpath));
         file_put_contents($_ENV['OUTPUT_PATH'] . $subpath . '.html', $output);
     } else if (!is_dir($contentFile->getRealPath())) {
-        echo $subpath . "\n";
+        writeLn($subpath);
         copy($contentFile->getRealPath(), $_ENV['OUTPUT_PATH'] . $subpath);
+    }
+}
+
+function writeLn(string $line, $force = false) {
+    if ($force || $_ENV['VERBOSE']) {
+        echo $line . "\n";
     }
 }
