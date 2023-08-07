@@ -51,6 +51,22 @@ if (! file_exists($_ENV['WORKING_DIR'] . '/build')) {
     mkdir($_ENV['WORKING_DIR'] . '/build', 0775);
 }
 
+if (file_exists($_ENV['OUTPUT_PATH'])) {
+    $oldFiles = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator(
+            $_ENV['OUTPUT_PATH'],
+            RecursiveDirectoryIterator::SKIP_DOTS
+        ),
+        RecursiveIteratorIterator::CHILD_FIRST
+    );
+
+    foreach ($oldFiles as $oldFile) {
+        $oldFile->isLink() || $oldFile->isFile()
+            ? unlink($oldFile)
+            : rmdir($oldFile);
+    }
+}
+
 // 1.   copy stuff from public to content
 
 // 1.1. scan public folder for structure
@@ -181,3 +197,4 @@ function writeLn(string $line, $force = false) {
         echo $line . "\n";
     }
 }
+
