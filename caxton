@@ -57,15 +57,12 @@ if (file_exists(Config::instance()->get('paths.output'))) {
 }
 
 $middlewares = [
-    // 1.   copy stuff from public to content
     Middleware\CopyPublicFiles::class,
-    // 2.   build content
     Middleware\BuildContentFiles::class,
 ];
 
 $action = fn (FileList $files): FileList => $files;
-
-foreach ($middlewares as $m) {
+foreach (array_reverse($middlewares) as $m) {
     $middleware = new $m();
     $action = fn (FileList $files): FileList => $middleware->run($files, $action);
 }
