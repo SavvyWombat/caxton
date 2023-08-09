@@ -15,46 +15,46 @@ use Illuminate\View\Engines\EngineResolver;
 use Illuminate\View\Factory;
 use Illuminate\View\FileViewFinder;
 use SavvyWombat\Caxton\App;
+use SavvyWombat\Caxton\Config;
+use SavvyWombat\Caxton\ConfigFile;
 use SavvyWombat\Caxton\ContentFileFilter;
 
-$_ENV['VERBOSE'] = in_array('-v', $argv) || in_array('--verbose', $argv);
+$config = [];
+$config['verbose'] = in_array('-v', $argv) || in_array('--verbose', $argv);
 
 $index = array_search('-e', $argv) ?: array_search('--env', $argv);
-$_ENV['ENVIRONMENT'] = $argv[$index + 1] ?? 'dev';
-$_ENV['WORKING_DIR'] = getcwd();
+$config['environment'] = $argv[$index + 1] ?? 'dev';
+$config['paths']['base'] = getcwd();
 
 // prefer specific environment if available
-$env = Dotenv\Dotenv::createImmutable(realpath($_ENV['WORKING_DIR']), '.env.' . $_ENV['ENVIRONMENT']);
+$env = Dotenv\Dotenv::createImmutable(realpath($config['paths']['base']), '.env.' . $config['environment']);
 $env->safeLoad();
 
 // fill in any gaps from local .env
-$dotenv = Dotenv\Dotenv::createImmutable(realpath($_ENV['WORKING_DIR']));
+$dotenv = Dotenv\Dotenv::createImmutable(realpath($config['paths']['base']));
 $dotenv->load();
 
-// look for a caxton config
-$_ENV['CONFIG'] = [];
-if (file_exists(realpath($_ENV['WORKING_DIR'] . '/caxton.json'))) {
-    $_ENV['CONFIG'] = json_decode(
-            file_get_contents(realpath($_ENV['WORKING_DIR'] . '/caxton.json')),
-            true
-    );
-}
+$config['base_url'] = $_ENV['BASE_URL'] ?? "http://localhost";
+$config['paths']['content'] = $config['paths']['base'] . ($_ENV['CONTENT_DIR'] ?? '/content');
+$config['paths']['public'] = $config['paths']['base'] . ($_ENV['PUBLIC_DIR'] ?? '/public');
+$config['paths']['cache'] = $config['paths']['base'] . '/build' . ($_ENV['CACHE_DIR'] ?? '/cache');
+$config['paths']['output'] = $config['paths']['base'] . '/build' . ($_ENV['OUTPUT_DIR'] ?? '/' . $config['environment']);
 
-$_ENV['BASE_URL'] = $_ENV['BASE_URL'] ?? "http://localhost";
-$_ENV['CONTENT_PATH'] = $_ENV['WORKING_DIR'] . ($_ENV['CONTENT_DIR'] ?? '/content');
-$_ENV['PUBLIC_PATH'] = $_ENV['WORKING_DIR'] . ($_ENV['PUBLIC_DIR'] ?? '/public');
-$_ENV['CACHE_PATH'] = $_ENV['WORKING_DIR'] . '/build' . ($_ENV['CACHE_DIR'] ?? '/cache');
-$_ENV['OUTPUT_PATH'] = $_ENV['WORKING_DIR'] . '/build' . ($_ENV['OUTPUT_DIR'] ?? '/' . $_ENV['ENVIRONMENT']);
+$config = Config::instance(
+    $config,
+    ConfigFile::read($config['paths']['base'] . '/caxton.json', []),
+    ConfigFile::read($config['paths']['base'] . '/caxton.' . $config['environment'] . '.json', []),
+);
 
 // 0.   clean old build
-if (! file_exists($_ENV['WORKING_DIR'] . '/build')) {
-    mkdir($_ENV['WORKING_DIR'] . '/build', 0775);
+if (! file_exists($config::instance()->get('paths.base') . '/build')) {
+    mkdir($config::instance()->get('paths.base') . '/build', 0775);
 }
 
-if (file_exists($_ENV['OUTPUT_PATH'])) {
+if (file_exists(Config::instance()->get('paths.output'))) {
     $oldFiles = new RecursiveIteratorIterator(
         new RecursiveDirectoryIterator(
-            $_ENV['OUTPUT_PATH'],
+            Config::instance()->get('paths.output'),
             RecursiveDirectoryIterator::SKIP_DOTS
         ),
         RecursiveIteratorIterator::CHILD_FIRST
@@ -73,7 +73,7 @@ if (file_exists($_ENV['OUTPUT_PATH'])) {
 $publicFiles = new RecursiveIteratorIterator(
     new ContentFileFilter(
         new RecursiveDirectoryIterator(
-            $_ENV['PUBLIC_PATH'],
+            Config::instance()->get('paths.public'),
             FilesystemIterator::SKIP_DOTS
         )
     ),
@@ -83,20 +83,20 @@ $publicFiles = new RecursiveIteratorIterator(
 // 1.2. copy files
 foreach ($publicFiles as $publicFile) {
     $subpath = str_replace(
-        $_ENV['PUBLIC_PATH'],
+        Config::instance()->get('paths.public'),
         '',
         $publicFile->getRealPath()
     );
 
-    if (!file_exists($_ENV['OUTPUT_PATH'] . dirname($subpath))) {
+    if (!file_exists(Config::instance()->get('paths.output') . dirname($subpath))) {
         // directories need the 'execute/search' bit
         // permissions are subject to the umask value in the running environment
-        mkdir($_ENV['OUTPUT_PATH'] . dirname($subpath), 0775, true);
+        mkdir(Config::instance()->get('paths.output') . dirname($subpath), 0775, true);
     }
 
     if (!is_dir($publicFile->getRealPath())) {
         writeLn($subpath);
-        copy($publicFile->getRealPath(), $_ENV['OUTPUT_PATH'] . $subpath);
+        copy($publicFile->getRealPath(), Config::instance()->get('paths.output') . $subpath);
     }
 }
 
@@ -108,7 +108,7 @@ foreach ($publicFiles as $publicFile) {
 $contentFiles = new RecursiveIteratorIterator(
     new ContentFileFilter(
         new RecursiveDirectoryIterator(
-            $_ENV['CONTENT_PATH'],
+            Config::instance()->get('paths.content'),
             FilesystemIterator::SKIP_DOTS
         )
     ),
@@ -130,13 +130,13 @@ $eventDispatcher = new Dispatcher($container);
 
 // Create View Factory capable of rendering PHP and Blade templates
 $viewResolver = new EngineResolver;
-$bladeCompiler = new BladeCompiler($filesystem, $_ENV['CACHE_PATH']);
+$bladeCompiler = new BladeCompiler($filesystem, Config::instance()->get('paths.cache'));
 
 $viewResolver->register('blade', function () use ($bladeCompiler) {
     return new CompilerEngine($bladeCompiler);
 });
 
-$viewFinder = new FileViewFinder($filesystem, [$_ENV['CONTENT_PATH']]);
+$viewFinder = new FileViewFinder($filesystem, [Config::instance()->get('paths.content')]);
 $viewFactory = new Factory($viewResolver, $viewFinder, $eventDispatcher);
 $viewFactory->setContainer($container);
 Facade::setFacadeApplication($container);
@@ -163,15 +163,15 @@ $container->alias(
 
 foreach ($contentFiles as $contentFile) {
     $subpath = str_replace(
-        $_ENV['CONTENT_PATH'],
+        Config::instance()->get('paths.content'),
         '',
         $contentFile->getRealPath()
     );
 
-    if (!file_exists($_ENV['OUTPUT_PATH'] . dirname($subpath))) {
+    if (!file_exists(Config::instance()->get('paths.output') . dirname($subpath))) {
         // directories need the 'execute/search' bit
         // permissions are subject to the umask value in the running environment
-        mkdir($_ENV['OUTPUT_PATH'] . dirname($subpath), 0775, true);
+        mkdir(Config::instance()->get('paths.output') . dirname($subpath), 0775, true);
     }
 
     if (str_ends_with($subpath, '.blade.php')) {
@@ -180,20 +180,20 @@ foreach ($contentFiles as $contentFile) {
             str_replace('/', '.', $subpath),
             [
                 'page' => null,
-                'url' => $_ENV['BASE_URL'] . (str_ends_with($subpath, 'index') ? substr($subpath, 0, -5) : $subpath),
+                'url' => Config::instance()->get('base_url') . (str_ends_with($subpath, 'index') ? substr($subpath, 0, -5) : $subpath),
             ]
         )->render();
 
-        writeLn($_ENV['BASE_URL'] . (str_ends_with($subpath, 'index') ? substr($subpath, 0, -5) : $subpath));
-        file_put_contents($_ENV['OUTPUT_PATH'] . $subpath . '.html', $output);
+        writeLn(Config::instance()->get('base_url') . (str_ends_with($subpath, 'index') ? substr($subpath, 0, -5) : $subpath));
+        file_put_contents(Config::instance()->get('paths.output') . $subpath . '.html', $output);
     } else if (!is_dir($contentFile->getRealPath())) {
         writeLn($subpath);
-        copy($contentFile->getRealPath(), $_ENV['OUTPUT_PATH'] . $subpath);
+        copy($contentFile->getRealPath(), Config::instance()->get('paths.output') . $subpath);
     }
 }
 
 function writeLn(string $line, $force = false) {
-    if ($force || $_ENV['VERBOSE']) {
+    if ($force || Config::instance()->get('verbose')) {
         echo $line . "\n";
     }
 }
