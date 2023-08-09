@@ -10,7 +10,7 @@ class App extends Container
     /**
      * @return bool
      *
-     * @see \Illuminate\Contracts\Foundation\Application::isDownForMaintenance()
+     * @see Application::isDownForMaintenance()
      */
     public function isDownForMaintenance(): bool
     {
@@ -21,7 +21,7 @@ class App extends Container
      * @param string|string[] $environments
      * @return string|bool
      *
-     * @see \Illuminate\Contracts\Foundation\Application::environment()
+     * @see Application::environment()
      */
     public function environment(...$environments)
     {
@@ -38,7 +38,7 @@ class App extends Container
     /**
      * @return string
      *
-     * @see \Illuminate\Contracts\Foundation\Application::getNamespace()
+     * @see Application::getNamespace()
      */
     public function getNamespace(): string
     {
