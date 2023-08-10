@@ -23,7 +23,10 @@ Caxton looks for a `.env` file in your project's root directory. The following v
 
 You can create different environment configurations, for example `.env.prod`.
 
-Caxton will also look for additional configuration in `caxton.json`. The various options are covered in the relevant sections below.
+The default environment when building is `dev`.
+
+Caxton will also look for additional configuration in `caxton.json` and `caxton.{environment}.json`.
+The various options are covered in the relevant sections below.
 
 ### Building with Caxton
 
@@ -38,6 +41,8 @@ To build for specific environment:
 ```
 vendor/bin/caxton -e prod
 ```
+
+The default environment is `dev`, so any configuration targeting the `dev` environment will be used.
 
 ## Assets (styles, scripts and images)
 
@@ -79,22 +84,31 @@ It will then copy any asset files from the `content` directory, as well as build
 
 Files and directories that begin with a `.` or `_` will not be ignored.
 
-### Block/allow list
+### Include/exclude list
 
-You can specify blocked and allowed filenames in the `caxton.json` configuration file. File paths are relative to the working directory.
+You can specify files for inclusion or exclusion in the `caxton.json` configuration file. File paths are relative to the working directory.
 
 ```
 {
   "files": {
-    "allow": [
+    "include": [
       "public/_redirects"
     ],
-    "block": [
+    "exclude": [
       "content/never-include-this-file"
     ],
   }
 }
 ```
+
+### Sitemap
+
+Caxton will generate a `sitemap.xml` and add it to the root of your output directory.
+Only HTML files will be included, and the last modified time will be calculated based on the source/template file.
+
+## Publishing
+
+Caxton simply builds a directory of content that can be published. How you publish your content is up to you.
 
 ## Why is this package called Caxton?
 
