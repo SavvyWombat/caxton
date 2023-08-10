@@ -10,8 +10,8 @@ class ContentFileFilter extends \RecursiveFilterIterator
         $filename = $this->current()->getFilename();
 
         if (
-            in_array($pathname, Config::instance()->get('files.block', []))
-            || (! in_array($pathname, Config::instance()->get('files.allow', []))
+            in_array($pathname, Config::instance()->get('files.exclude', []))
+            || (! in_array($pathname, Config::instance()->get('files.include', []))
                 && ($filename[0] === '.' || $filename[0] === '_')
             )
         ) {

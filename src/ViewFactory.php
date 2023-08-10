@@ -41,7 +41,13 @@ class ViewFactory
             return new CompilerEngine($bladeCompiler);
         });
 
-        $viewFinder = new FileViewFinder($filesystem, [Config::instance()->get('paths.content')]);
+        $viewFinder = new FileViewFinder(
+            $filesystem,
+            [
+                Config::instance()->get('paths.content'),
+                realpath(__DIR__ . '/../resources/views'),
+            ]
+        );
 
         $this->viewFactory = new Factory($viewResolver, $viewFinder, $eventDispatcher);
         $this->viewFactory->setContainer($container);

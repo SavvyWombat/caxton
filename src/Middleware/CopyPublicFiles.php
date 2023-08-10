@@ -37,7 +37,10 @@ class CopyPublicFiles implements Middleware
             if (!is_dir($publicFile->getRealPath())) {
                 copy($publicFile->getRealPath(), Config::instance()->get('paths.output') . $subpath);
 
-                $files->add(new File($subpath));
+                $files->add(new File(
+                    filename: $subpath,
+                    source: $publicFile->getRealPath(),
+                ));
             }
         }
 

@@ -41,15 +41,22 @@ class BuildContentFiles implements Middleware
                     str_replace('/', '.', $subpath),
                     [
                         'page' => null,
-                        'url' => Config::instance()->get('base_url') . (str_ends_with($subpath, 'index') ? substr($subpath, 0, -5) : $subpath),
+                        'url' => Config::instance()->get('base_url') . (str_ends_with($subpath, '/index') ? substr($subpath, 0, -6) : $subpath),
                     ]
                 )->render();
 
                 file_put_contents(Config::instance()->get('paths.output') . $subpath . '.html', $output);
-                $files->add(new File($subpath . '.html'));
+                $files->add(new File(
+                    filename: $subpath . '.html',
+                    url: (str_ends_with($subpath, '/index')) ? substr($subpath, 0, -6) : $subpath,
+                    source: $contentFile->getRealPath(),
+                ));
             } else if (!is_dir($contentFile->getRealPath())) {
                 copy($contentFile->getRealPath(), Config::instance()->get('paths.output') . $subpath);
-                $files->add(new File($subpath));
+                $files->add(new File(
+                    filename: $subpath,
+                    source: $contentFile->getRealPath(),
+                ));
             }
         }
 
