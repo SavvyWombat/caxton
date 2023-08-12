@@ -2,10 +2,10 @@
 
 namespace SavvyWombat\Caxton\Middleware;
 
+use SavvyWombat\Caxton\Blade\ViewFactory;
 use SavvyWombat\Caxton\Config;
 use SavvyWombat\Caxton\File;
 use SavvyWombat\Caxton\FileList;
-use SavvyWombat\Caxton\ViewFactory;
 
 /**
  * Builds a sitemap file to assist search engine discovery.

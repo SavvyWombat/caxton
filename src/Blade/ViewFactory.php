@@ -1,6 +1,6 @@
 <?php
 
-namespace SavvyWombat\Caxton;
+namespace SavvyWombat\Caxton\Blade;
 
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Events\Dispatcher;
@@ -13,6 +13,9 @@ use Illuminate\View\Engines\CompilerEngine;
 use Illuminate\View\Engines\EngineResolver;
 use Illuminate\View\Factory;
 use Illuminate\View\FileViewFinder;
+use League\CommonMark\CommonMarkConverter;
+use SavvyWombat\Caxton\App;
+use SavvyWombat\Caxton\Config;
 
 class ViewFactory
 {
@@ -37,20 +40,23 @@ class ViewFactory
         $viewResolver = new EngineResolver;
         $bladeCompiler = new BladeCompiler($filesystem, Config::instance()->get('paths.cache'));
 
-        $viewResolver->register('blade', function () use ($bladeCompiler) {
-            return new CompilerEngine($bladeCompiler);
-        });
+        $compilerEngine = new CompilerEngine($bladeCompiler);
+
+        $viewResolver->register('blade', fn() => $compilerEngine);
+        $viewResolver->register('markdown', fn() => new MarkdownEngine($compilerEngine, new CommonMarkConverter()));
 
         $viewFinder = new FileViewFinder(
             $filesystem,
             [
                 Config::instance()->get('paths.content'),
-                realpath(__DIR__ . '/../resources/views'),
+                realpath(__DIR__ . '/../../resources/views'),
             ]
         );
 
         $this->viewFactory = new Factory($viewResolver, $viewFinder, $eventDispatcher);
         $this->viewFactory->setContainer($container);
+
+        $this->viewFactory->addExtension('blade.md', 'markdown');
 
         Facade::setFacadeApplication($container);
         $container->instance(\Illuminate\Contracts\View\Factory::class, $this->viewFactory);

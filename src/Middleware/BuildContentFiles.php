@@ -2,11 +2,11 @@
 
 namespace SavvyWombat\Caxton\Middleware;
 
+use SavvyWombat\Caxton\Blade\ViewFactory;
 use SavvyWombat\Caxton\Config;
 use SavvyWombat\Caxton\ContentFileFilter;
 use SavvyWombat\Caxton\File;
 use SavvyWombat\Caxton\FileList;
-use SavvyWombat\Caxton\ViewFactory;
 
 class BuildContentFiles implements Middleware
 {
@@ -35,8 +35,9 @@ class BuildContentFiles implements Middleware
                 mkdir(Config::instance()->get('paths.output') . dirname($subpath), 0775, true);
             }
 
-            if (str_ends_with($subpath, '.blade.php')) {
-                $subpath = str_replace('.blade.php', '', $subpath);
+            $matches = [];
+            if (preg_match('#(.*)\.blade\.(md|php)$#', $subpath, $matches)) {
+                $subpath = $matches[1];
                 $output = ViewFactory::instance()->make(
                     str_replace('/', '.', $subpath),
                     [
