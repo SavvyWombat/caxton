@@ -1,6 +1,6 @@
 <?php
 
-namespace SavvyWombat\Caxton\Blade;
+namespace SavvyWombat\Caxton\Markdown;
 
 use League\CommonMark\Environment\EnvironmentBuilderInterface;
 use League\CommonMark\Extension\CommonMark as CommonMarkCoreExtension;

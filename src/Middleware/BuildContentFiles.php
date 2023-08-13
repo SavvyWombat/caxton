@@ -7,6 +7,7 @@ use SavvyWombat\Caxton\Config;
 use SavvyWombat\Caxton\ContentFileFilter;
 use SavvyWombat\Caxton\File;
 use SavvyWombat\Caxton\FileList;
+use SavvyWombat\Caxton\Markdown\MarkdownConverter;
 
 class BuildContentFiles implements Middleware
 {
@@ -37,12 +38,20 @@ class BuildContentFiles implements Middleware
 
             $matches = [];
             if (preg_match('#(.*)\.blade\.(md|php)$#', $subpath, $matches)) {
+                $markdown = new MarkdownConverter();
+                $frontMatter = $markdown->extractFrontMatter(
+                    file_get_contents(Config::instance()->get('paths.content') . $subpath)
+                );
+
+                $data = yaml_parse($frontMatter) ?? [];
+
                 $subpath = $matches[1];
                 $output = ViewFactory::instance()->make(
                     str_replace('/', '.', $subpath),
                     [
                         'page' => null,
                         'url' => Config::instance()->get('base_url') . (str_ends_with($subpath, '/index') ? substr($subpath, 0, -6) : $subpath),
+                        ...$data,
                     ]
                 )->render();
 

@@ -15,6 +15,7 @@ use Illuminate\View\Factory;
 use Illuminate\View\FileViewFinder;
 use SavvyWombat\Caxton\App;
 use SavvyWombat\Caxton\Config;
+use SavvyWombat\Caxton\Markdown\MarkdownConverter;
 
 class ViewFactory
 {

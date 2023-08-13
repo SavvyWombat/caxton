@@ -22,6 +22,7 @@
   "require": {
     "php": "^8.1",
     "ext-fileinfo": "*",
+    "ext-yaml": "*",
     "illuminate/view": "^10.13",
     "vlucas/phpdotenv": "^5.5",
     "league/commonmark": "^2.4"
