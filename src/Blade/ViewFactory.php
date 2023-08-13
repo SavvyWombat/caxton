@@ -42,7 +42,7 @@ class ViewFactory
 
         $compilerEngine = new CompilerEngine($bladeCompiler);
 
-        $viewResolver->register('blade', fn() => $compilerEngine);
+        $viewResolver->register('blade', fn() => new DefaultEngine($compilerEngine, new MarkdownConverter()));
         $viewResolver->register('markdown', fn() => new MarkdownEngine($compilerEngine, new MarkdownConverter()));
 
         $viewFinder = new FileViewFinder(
