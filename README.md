@@ -113,3 +113,10 @@ Caxton simply builds a directory of content that can be published. How you publi
 ## Why is this package called Caxton?
 
 William Caxton is thought to be the person who introduced the printing press to England, and so ushered in a great advance in the production of books and dispersal of knowledge.
+
+## Acknowledgements
+
+This package uses Laravel's Blade template engine, without requiring the full Laravel framework.
+
+Matt Stauffer has a [GitHub repository](https://github.com/mattstauffer/Torch) which has various examples of how to use parts of the framework as standalone components.
+Specifically, the [view component](https://github.com/mattstauffer/Torch/tree/master/components/view) enables the use of Blade.
