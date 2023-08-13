@@ -67,6 +67,67 @@ The content directory is where you put your templates that Caxton will use to cr
 You can include assets (images, stylesheets, scripts, and so on) alongside your templates.
 These assets will then be included in the same output directory as the generated HTML.
 
+## Authoring
+
+### Blade PHP Templates
+
+Caxton uses Laravel's Blade template system. 
+Any files in the `content` directory that end with `.blade.php` will be converted into an HTML document with the same name.
+
+### Markdown
+
+Caxton also allows the use of Markdown within a Blade template.
+Files in the `content` directory that end with `.blade.md` will be passed through a Markdown parser before being saved as an HTML document.
+
+Caxton supports the default CommonMark syntax using the [PHP League's](https://commonmark.thephpleague.com/) package, with one exception.
+The indentation syntax to format code blocks has been disabled, meaning code blocks must be wrapped in ``` delimiters.
+
+### Front Matter
+
+Caxton supports front matter YAML at the start of any template file (PHP or Markdown).
+The values in the front matter are injected as view data, becoming available as PHP variables within the template.
+
+### Example
+
+#### index.blade.php
+```
+---
+title: Example document
+---
+
+@extends('_layouts.html')
+
+@section('content')
+  <p>Hello World</p>
+@endsection
+```
+
+#### about.blade.md
+```
+---
+title: About Markdown
+---
+
+@extends('_layouts.html')
+
+@section('content')
+
+This is Markdown.
+
+@endsection
+```
+
+#### _layouts/html.blade.php
+```
+<html lang="en">
+<head>
+    <title>{{ $title }}</title>
+</head>
+<body>
+    @yield('section')
+</body>
+```
+
 ## Building
 
 ```
