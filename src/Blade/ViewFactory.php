@@ -13,7 +13,6 @@ use Illuminate\View\Engines\CompilerEngine;
 use Illuminate\View\Engines\EngineResolver;
 use Illuminate\View\Factory;
 use Illuminate\View\FileViewFinder;
-use League\CommonMark\CommonMarkConverter;
 use SavvyWombat\Caxton\App;
 use SavvyWombat\Caxton\Config;
 
@@ -43,7 +42,7 @@ class ViewFactory
         $compilerEngine = new CompilerEngine($bladeCompiler);
 
         $viewResolver->register('blade', fn() => $compilerEngine);
-        $viewResolver->register('markdown', fn() => new MarkdownEngine($compilerEngine, new CommonMarkConverter()));
+        $viewResolver->register('markdown', fn() => new MarkdownEngine($compilerEngine, new MarkdownConverter()));
 
         $viewFinder = new FileViewFinder(
             $filesystem,
