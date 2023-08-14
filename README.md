@@ -175,8 +175,8 @@ For example:
 |-+ blog
   |-+ 2018
     |-+ 10-22-it-begins
-      |-  index.blade.md
-      |-  pretty-picture.png
+      |-- index.blade.md
+      |-- pretty-picture.png
 ```
 
 To output this document as `/blog/2018-10-22/it-begins`, you can use this in your `caxton.json` file:
