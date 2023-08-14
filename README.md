@@ -162,6 +162,50 @@ You can specify files for inclusion or exclusion in the `caxton.json` configurat
 }
 ```
 
+### Output mapping
+
+By default, the output URLs will follow the same structure as the folder paths within your public and content directories.
+
+If you like to organise your files differently, then you can use the `output.maps` configuration to map the URLs accordingly.
+
+For example:
+
+```
++ content
+|-+ blog
+  |-+ 2018
+    |-+ 10-22-it-begins
+      |-  index.blade.md
+      |-  pretty-picture.png
+```
+
+To output this document as `/blog/2018-10-22/it-begins`, you can use this in your `caxton.json` file:
+
+```
+{
+  "output": {
+    "maps": [
+      {
+        "path": "/blog/*/*/",
+        "url": "/blog/{{ date }}/{{ slug }}/"
+      }
+    ]
+  }
+}
+```
+
+`date` and `slug` are read from the front matter of the template file.
+
+```
+---
+date: 2018-10-22
+slug: it-begins
+---
+```
+
+Caxton will then store an internal map for all output for paths starting with `/blog/2018/10-22-it-begins/` and rewrite them as `/blog/2018-10-22/it-begins`.
+This means that any resources related to the blog post (such as the `png` file) will be written to the same output URL. 
+
 ### Sitemap
 
 Caxton will generate a `sitemap.xml` and add it to the root of your output directory.

@@ -6,7 +6,7 @@ require_once 'vendor/autoload.php';
 use SavvyWombat\Caxton\Config;
 use SavvyWombat\Caxton\ConfigFile;
 use SavvyWombat\Caxton\Middleware;
-use SavvyWombat\Caxton\FileList;
+use SavvyWombat\Caxton\Site;
 
 $config = [];
 $config['verbose'] = in_array('-v', $argv) || in_array('--verbose', $argv);
@@ -28,6 +28,8 @@ $config['paths']['content'] = $config['paths']['base'] . ($_ENV['CONTENT_DIR'] ?
 $config['paths']['public'] = $config['paths']['base'] . ($_ENV['PUBLIC_DIR'] ?? '/public');
 $config['paths']['cache'] = $config['paths']['base'] . '/build' . ($_ENV['CACHE_DIR'] ?? '/cache');
 $config['paths']['output'] = $config['paths']['base'] . '/build' . ($_ENV['OUTPUT_DIR'] ?? '/' . $config['environment']);
+
+$config['blade']['extensions'] = '.blade.(md|php)';
 
 $config = Config::instance(
     $config,
@@ -57,14 +59,14 @@ if (file_exists(Config::instance()->get('paths.output'))) {
 }
 
 $middlewares = [
-    Middleware\CopyPublicFiles::class,
+    Middleware\ScanFiles::class,
+    Middleware\CopyStaticFiles::class,
     Middleware\BuildContentFiles::class,
-    Middleware\GenerateSiteMap::class,
 ];
 
-$action = fn (FileList $files): FileList => $files;
+$action = fn (Site $site): Site => $site;
 foreach (array_reverse($middlewares) as $m) {
     $middleware = new $m();
-    $action = fn (FileList $files): FileList => $middleware->run($files, $action);
+    $action = fn (Site $site): Site => $middleware->run($site, $action);
 }
-$action(new FileList());
+$action(Site::instance());

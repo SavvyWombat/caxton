@@ -2,9 +2,9 @@
 
 namespace SavvyWombat\Caxton\Middleware;
 
-use SavvyWombat\Caxton\FileList;
+use SavvyWombat\Caxton\Site;
 
 interface Middleware
 {
-    public function run(FileList $files, callable $next): FileList;
+    public function run(Site $site, callable $next): Site;
 }
