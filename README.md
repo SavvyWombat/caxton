@@ -1,6 +1,6 @@
 # Caxton
 
-A static site generator written in PHP using Blade templates.
+A static site generator written in PHP using Blade templates and Markdown.
 
 ## Getting started
 

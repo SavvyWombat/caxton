@@ -1,12 +1,13 @@
 {
   "name": "savvywombat/caxton",
-  "description": "A static site generator written in PHP using Blade templates",
+  "description": "A static site generator written in PHP using Blade templates and markdown",
   "keywords": [
     "php",
     "static site generator",
     "static site builder",
     "blade",
-    "template"
+    "template",
+    "markdown"
   ],
   "license": "MIT",
   "support": {
