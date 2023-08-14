@@ -6,7 +6,7 @@ use SavvyWombat\Caxton\Config;
 use SavvyWombat\Caxton\ContentFileFilter;
 use SavvyWombat\Caxton\Markdown\MarkdownConverter;
 use SavvyWombat\Caxton\Site;
-use SavvyWombat\Caxton\SourceFile;
+use SavvyWombat\Caxton\File;
 
 class ScanFiles implements Middleware
 {
@@ -48,7 +48,7 @@ class ScanFiles implements Middleware
                 );
 
                 $this->site->addFile(
-                    new SourceFile($sourcePath, $outputPath)
+                    new File($sourcePath, $outputPath)
                 );
             }
         }
@@ -91,7 +91,7 @@ class ScanFiles implements Middleware
                 }
 
                 $this->site->addFile(
-                    new SourceFile($sourcePath, $outputPath, $data)
+                    new File($sourcePath, $outputPath, $data)
                 );
             }
         }

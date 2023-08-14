@@ -62,6 +62,7 @@ $middlewares = [
     Middleware\ScanFiles::class,
     Middleware\CopyStaticFiles::class,
     Middleware\BuildContentFiles::class,
+    Middleware\GenerateSiteMap::class,
 ];
 
 $action = fn (Site $site): Site => $site;

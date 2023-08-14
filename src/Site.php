@@ -18,7 +18,7 @@ class Site
         return self::$instance;
     }
 
-    public function addFile(SourceFile $file): void
+    public function addFile(File $file): void
     {
         $this->sourceFiles[] = $file;
     }

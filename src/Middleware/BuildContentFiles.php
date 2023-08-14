@@ -6,7 +6,7 @@ use SavvyWombat\Caxton\Blade\ViewFactory;
 use SavvyWombat\Caxton\Config;
 use SavvyWombat\Caxton\Markdown\MarkdownConverter;
 use SavvyWombat\Caxton\Site;
-use SavvyWombat\Caxton\SourceFile;
+use SavvyWombat\Caxton\File;
 
 class BuildContentFiles implements Middleware
 {
@@ -29,7 +29,7 @@ class BuildContentFiles implements Middleware
         return $next($site);
     }
 
-    protected function buildFromTemplate(SourceFile $sourceFile, string $outputPath)
+    protected function buildFromTemplate(File $sourceFile, string $outputPath)
     {
         $extensions = str_replace('.', '\.', Config::instance()->get('blade.extensions'));
 
