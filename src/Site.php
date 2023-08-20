@@ -8,6 +8,7 @@ class Site
 
     protected array $sourceFiles = [];
     protected array $maps = [];
+    protected array $indexes = [];
 
     public static function instance(): Site
     {
@@ -23,7 +24,7 @@ class Site
         $this->sourceFiles[] = $file;
     }
 
-    public function sourceFiles()
+    public function sourceFiles(): array
     {
         return $this->sourceFiles;
     }
@@ -35,8 +36,26 @@ class Site
         }
     }
 
-    public function maps()
+    public function maps(): array
     {
         return $this->maps;
+    }
+
+    public function addToIndex(string $index, File $file): void
+    {
+        if (! isset($this->indexes[$index])) {
+            $this->indexes[$index] = [];
+        }
+
+        $this->indexes[$index][] = $file;
+    }
+
+    public function index(string $index): array
+    {
+        if (! isset($this->indexes[$index])) {
+            return [];
+        }
+
+        return $this->indexes[$index];
     }
 }

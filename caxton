@@ -60,6 +60,7 @@ if (file_exists(Config::instance()->get('paths.output'))) {
 
 $middlewares = [
     Middleware\ScanFiles::class,
+    Middleware\BuildIndexes::class,
     Middleware\CopyStaticFiles::class,
     Middleware\BuildContentFiles::class,
     Middleware\GenerateSiteMap::class,
