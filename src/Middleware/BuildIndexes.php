@@ -10,7 +10,6 @@ class BuildIndexes implements Middleware
     {
         foreach ($site->sourceFiles() as $sourceFile) {
             if (isset($sourceFile->data()['index'])) {
-                var_dump($sourceFile->data()['index']);
                 $site->addToIndex($sourceFile->data()['index'], $sourceFile);
             }
         }
