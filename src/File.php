@@ -46,9 +46,17 @@ class File
         return Config::instance()->get('base_url') . '/' . $this->url();
     }
 
-    public function data(): array
+    public function data(?string $key = null): mixed
     {
-        return $this->data;
+        if (! $key) {
+            return $this->data;
+        }
+
+        if (isset($this->data[$key])) {
+            return $this->data[$key];
+        }
+
+        return null;
     }
 
     public function type(): string
