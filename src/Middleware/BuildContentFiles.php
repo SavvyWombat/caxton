@@ -11,6 +11,7 @@ use SavvyWombat\Caxton\File;
 class BuildContentFiles implements Middleware
 {
     protected $markdown = null;
+    protected ?Site $site = null;
 
     public function __construct() {
         $this->markdown = new MarkdownConverter();
@@ -18,6 +19,8 @@ class BuildContentFiles implements Middleware
 
     public function run(Site $site, callable $next): Site
     {
+        $this->site = $site;
+
         $extensions = str_replace('.', '\.', Config::instance()->get('blade.extensions'));
 
         foreach ($site->sourceFiles() as $file) {
@@ -50,7 +53,10 @@ class BuildContentFiles implements Middleware
 
         $output = ViewFactory::instance()->make(
             str_replace('/', '.', $templateName),
-            $sourceFile->data()
+            [
+                'site' => $this->site,
+                ...$sourceFile->data(),
+            ],
         )->render();
 
         if (!file_exists(Config::instance()->get('paths.output') . dirname($outputPath))) {
