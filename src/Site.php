@@ -2,13 +2,22 @@
 
 namespace SavvyWombat\Caxton;
 
+use Illuminate\Support\Collection;
+
 class Site
 {
     protected static ?Site $instance = null;
 
-    protected array $sourceFiles = [];
-    protected array $maps = [];
-    protected array $indexes = [];
+    protected Collection $sourceFiles;
+    protected Collection $maps;
+    protected Collection $indexes;
+
+    protected function __construct()
+    {
+        $this->sourceFiles = new Collection();
+        $this->maps = new Collection();
+        $this->indexes = new Collection();
+    }
 
     public static function instance(): Site
     {
@@ -21,10 +30,10 @@ class Site
 
     public function addFile(File $file): void
     {
-        $this->sourceFiles[] = $file;
+        $this->sourceFiles->push($file);
     }
 
-    public function sourceFiles(): array
+    public function sourceFiles(): Collection
     {
         return $this->sourceFiles;
     }
@@ -32,30 +41,30 @@ class Site
     public function addMap(array $map): void
     {
         if (isset($map['url'])) {
-            $this->maps[] = $map;
+            $this->maps->push($map);
         }
     }
 
-    public function maps(): array
+    public function maps(): Collection
     {
         return $this->maps;
     }
 
     public function addToIndex(string $index, File $file): void
     {
-        if (! isset($this->indexes[$index])) {
-            $this->indexes[$index] = [];
+        if (! $this->indexes->has($index)) {
+            $this->indexes->put($index, new Collection());
         }
 
-        $this->indexes[$index][] = $file;
+        $this->indexes->get($index)->push($file);
     }
 
-    public function index(string $index): array
+    public function index(string $index): Collection
     {
-        if (! isset($this->indexes[$index])) {
-            return [];
+        if (! $this->indexes->has($index)) {
+            return new Collection();
         }
 
-        return $this->indexes[$index];
+        return $this->indexes->get($index);
     }
 }
