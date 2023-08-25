@@ -8,7 +8,7 @@ A static site generator written in PHP using Blade templates and Markdown.
 
 Caxton is available through Composer:
 
-```
+```bash
 composer require savvywombat\caxton --dev
 ```
 
@@ -32,13 +32,13 @@ The various options are covered in the relevant sections below.
 
 To build a site, you need at least one Blade template in your content directory. Then you can run:
 
-```
+```bash
 vendor/bin/caxton
 ```
 
 To build for specific environment:
 
-```
+```bash
 vendor/bin/caxton -e prod
 ```
 
@@ -90,7 +90,7 @@ The values in the front matter are injected as view data, becoming available as 
 ### Example
 
 #### index.blade.php
-```
+```php
 ---
 title: Example document
 ---
@@ -103,7 +103,7 @@ title: Example document
 ```
 
 #### about.blade.md
-```
+```php
 ---
 title: About Markdown
 ---
@@ -118,7 +118,7 @@ This is Markdown.
 ```
 
 #### _layouts/html.blade.php
-```
+```php
 <html lang="en">
 <head>
     <title>{{ $title }}</title>
@@ -128,15 +128,75 @@ This is Markdown.
 </body>
 ```
 
+### Indexes (file collections)
+
+Generated files can be collected into an index by specification in the template's front matter:
+
+```yaml
+---
+index: blog
+date: 2023-08-26
+title: Some blog post
+description: This is really interesting
+---
+```
+
+This allows you to refer to a [Laravel Collection](https://laravel.com/docs/10.x/collections) for generating lists:
+
+```php
+<ul class="index">
+    @foreach ($site->index('blog')->slice(0, 3) as $post)
+        <li>
+            <a href="{{ $post->url() }}">{{ $post->data('title') }}</a>
+            
+            <p class="date">{{ $post->data('date') }}</p>
+            
+            <p>
+                {{ $post->data('description') }}
+            </p>
+        </li>
+    @endforeach
+</ul>
+```
+
+#### Sorting
+
+While you can use the Collection's sortBy method, this can be a bit verbose with Caxton pages:
+
+```php
+@foreach ($site->index('blog')->sortByDesc(fn($post) => $post->data('date')) as $post)
+```
+
+You can define a default sort order in your `caxton.json` file: 
+
+```json
+{
+  "output": {
+    "index": {
+      "blog": ["date", "desc"],
+      "another": "title"
+    }
+  }
+}
+```
+
+```php
+@foreach ($site->index('blog') as $page)
+```
+
+#### Paged indexes
+
+Coming soon.
+
 ## Building
 
-```
+```bash
 vendor/bin/caxton
 ```
 
 The default output directory is `/project/dir/public/dev`, but can be overridden via the environment switch:
 
-```
+```bash
 vendor/bin/caxton -e prod
 ```
 
@@ -149,7 +209,7 @@ Files and directories that begin with a `.` or `_` will not be ignored.
 
 You can specify files for inclusion or exclusion in the `caxton.json` configuration file. File paths are relative to the working directory.
 
-```
+```json
 {
   "files": {
     "include": [
@@ -181,7 +241,7 @@ For example:
 
 To output this document as `/blog/2018-10-22/it-begins`, you can use this in your `caxton.json` file:
 
-```
+```json
 {
   "output": {
     "maps": [
@@ -196,7 +256,7 @@ To output this document as `/blog/2018-10-22/it-begins`, you can use this in you
 
 `date` and `slug` are read from the front matter of the template file.
 
-```
+```yaml
 ---
 date: 2018-10-22
 slug: it-begins

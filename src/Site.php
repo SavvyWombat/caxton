@@ -65,6 +65,30 @@ class Site
             return new Collection();
         }
 
-        return $this->indexes->get($index);
+        return $this->sortIndex($index, $this->indexes->get($index));
+    }
+
+    protected function sortIndex(string $name, Collection $index)
+    {
+        $config = Config::instance()->get('output.index.' . $name);
+
+        if (! $config) {
+            return $index;
+        }
+
+        if (is_string($config)) {
+            return $index->sortBy(function ($file) use ($config) {
+                return $file->data($config);
+            });
+        }
+
+        if (is_array($config)) {
+            list ($field, $order) = $config;
+            $sort = ($order === 'desc' ? 'sortByDesc' : 'sortBy');
+
+            return $index->$sort(function ($file) use ($field) {
+                return $file->data($field);
+            });
+        }
     }
 }
